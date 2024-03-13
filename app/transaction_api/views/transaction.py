@@ -2,7 +2,6 @@
 from flask_smorest import Blueprint, abort
 from flask.views import MethodView
 from http import HTTPStatus
-from uuid import UUID
 
 
 from app.transaction_api.service.DbModelService import DbModelService

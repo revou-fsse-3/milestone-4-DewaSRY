@@ -9,7 +9,6 @@ from app.transaction_api.schemas.account import AccountBaseSchemas, AccountRespo
 
 from app.transaction_api.service.ModelMatcher import matherAccountModeWIthId
 from pprint import pprint
-# from uuid import UUID
 
 
 from tests.views.ModelTestBase import ModelTestBase

@@ -7,15 +7,15 @@ from app.transaction_api.service.ModelMatcher import matherAccountModeWIthId
 from app.transaction_api.util.db import db
 
 
-
 class TransactionsBaseSchemas(Schema):
-    from_account_id=fields.UUID(required=True)
-    to_account_id=fields.UUID(required=True)
+    from_account_id=fields.Str(required=True)
+    to_account_id=fields.Str(required=True)
     amount = fields.Float(required=True)
     type=fields.Str(required=False)
     description=fields.Str(required=False)
     
-    @post_load
+    # @post_load
+    @classmethod
     def create_Transactions(self, data, **kwargs):
         from_account_id=data['from_account_id']
         to_account_id=data['to_account_id']
@@ -31,7 +31,6 @@ class TransactionsBaseSchemas(Schema):
         accountTo.update(balance=accountTo.balance+ amount )
         db.session.add_all([accountFrom,accountTo ])
         db.session.commit()
-        
         return TransactionsModel(**data)
 
 

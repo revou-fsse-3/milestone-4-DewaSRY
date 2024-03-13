@@ -4,7 +4,6 @@ from flask_smorest import Blueprint,abort
 from flask.views import MethodView
 from sqlalchemy.exc import SQLAlchemyError
 from http import HTTPStatus
-from uuid import UUID
 
 
 from app.transaction_api.service.DbModelService import DbModelService
@@ -43,7 +42,7 @@ class AccountViews(MethodView):
     @blp.response(HTTPStatus.OK, AccountResponseSchema)
     def get(self,item_id):
         """retrieve details of specific accounts by its id, """
-        return DBS.getDbModal(UUID(item_id))
+        return DBS.getDbModal(item_id)
     
     @blp.arguments(AccountUpdateSchemas)
     @blp.response(HTTPStatus.ACCEPTED, AccountResponseSchema)

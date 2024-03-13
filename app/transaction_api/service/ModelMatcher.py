@@ -5,7 +5,6 @@ from app.transaction_api.model.transaction import TransactionsModel
 from app.transaction_api.model.account import AccountModel
 
 
-from uuid import UUID
 from app.transaction_api.util.db import ModelType
 
 
@@ -17,7 +16,7 @@ def matherModel(model:ModelType,value:str= None):
 
 
 
-def matherAccountModeWIthId(accountId : UUID)-> AccountModel:
+def matherAccountModeWIthId(accountId : str)-> AccountModel:
     return AccountModel.query.filter(AccountModel.id == accountId).first()
 
  

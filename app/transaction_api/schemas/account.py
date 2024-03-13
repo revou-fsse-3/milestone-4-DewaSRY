@@ -9,8 +9,8 @@ class AccountUpdateSchemas():
 
 
 class AccountBaseSchemas(AccountUpdateSchemas):
-    user_id=fields.UUID() 
-    @post_load
+    user_id=fields.Str() 
+    # @post_load
     def create_account(self, data, **kwargs):
         return AccountModel(**data)
 
