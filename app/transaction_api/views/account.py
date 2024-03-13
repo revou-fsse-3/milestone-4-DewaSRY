@@ -8,47 +8,50 @@ from http import HTTPStatus
 
 from app.transaction_api.service.DbModelService import DbModelService
 from app.transaction_api.schemas.account import (
-    AccountBaseSchemas,
-    AccountResponseSchema,
-    AccountUpdateSchemas
+    AccountUpdateSchemas,
+    AccountCreateSchemas,
+    AccountResponseSchema
     )
 from app.transaction_api.model.account import AccountModel
 
 
-blp= Blueprint("account", __name__,description="""account managements """ )
+blp= Blueprint("account", __name__,description="""
+               account managements 
+               """ )
 
 DBS= DbModelService(AccountModel)
 
 @blp.route("/account")
 class AccountView(MethodView):
-    @blp.response(HTTPStatus.OK, AccountResponseSchema)
+    
+    @blp.response(HTTPStatus.OK, AccountResponseSchema(many=True))
     def get(self):
         """retrieve a list of all accounts belonging to the currently authenticated user"""
         return DBS.getDbModalAll()
     
-    @blp.arguments(AccountBaseSchemas)
+    @blp.arguments(AccountCreateSchemas)
     @blp.response(HTTPStatus.CREATED, AccountResponseSchema)
     def post(self,item_data):
         """create a new account for hte currently authenticated user"""
-        user:AccountModel= AccountBaseSchemas().loads(**item_data)
         try:
-            return DBS.addModel(user)
-        except Exception as  E:
-            abort(HTTPStatus.NOT_ACCEPTABLE, message="error while insert the animal")
+            return DBS.addModel(item_data)
+        except Exception as  E:            
+            abort(HTTPStatus.NOT_ACCEPTABLE, message="failed to create account")
     
-@blp.route("/account<string:account_id>")
+@blp.route("/account/<string:account_id>")
 class AccountViews(MethodView):
     
+    
     @blp.response(HTTPStatus.OK, AccountResponseSchema)
-    def get(self,item_id):
+    def get(self,account_id):
         """retrieve details of specific accounts by its id, """
-        return DBS.getDbModal(item_id)
+        return DBS.getDbModal(account_id)
     
     @blp.arguments(AccountUpdateSchemas)
     @blp.response(HTTPStatus.ACCEPTED, AccountResponseSchema)
-    def put(self,item_data,item_id):
+    def put(self,item_data,account_id):
         """update details of an existing account"""
         try:
-            return DBS.updateDbModel(item_id,item_data)
+            return DBS.updateDbModel(account_id,item_data)
         except SQLAlchemyError as  E:
             abort(HTTPStatus.NOT_ACCEPTABLE, message="error while update the animal")

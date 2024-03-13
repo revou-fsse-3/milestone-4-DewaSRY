@@ -19,6 +19,7 @@ class DbModelService:
             self.dbSession.add(model)
             self.dbSession.commit()
         except Exception as E:
+            print(E)
             raise SQLAlchemyError
 
     def getDbModal(self, store_id: str)->ModelType:

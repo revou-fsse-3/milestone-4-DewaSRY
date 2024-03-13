@@ -6,31 +6,37 @@ from http import HTTPStatus
 
 from app.transaction_api.service.DbModelService import DbModelService
 from app.transaction_api.schemas.transaction import (
-        TransactionsBaseSchemas,
-        TransactionsResponseSchema
+        TransactionsResponseSchema,
+        TransactionCreateSchemas,
+        TransactionPayloadSchemas
+    
     )
 from app.transaction_api.model.transaction import TransactionsModel
 
-
-
-
-blp= Blueprint("transactions", __name__, description="""transaction management """)
+blp= Blueprint("transactions", __name__, description="""
+               transaction management 
+               """)
 DBS= DbModelService(TransactionsModel)
 
 @blp.route("/transactions")
 class TransactionView(MethodView):
     
     @blp.response(HTTPStatus.OK, TransactionsResponseSchema(many=True))
-    def get():
+    def get(self):
         """Retrieve a list of all transaction for the currently authenticated user's account """
+        print("halloo")
         return DBS.getDbModalAll()
-    @blp.arguments(TransactionsBaseSchemas)
+    
+    @blp.arguments(TransactionPayloadSchemas)
     @blp.response(HTTPStatus.CREATED, TransactionsResponseSchema)
     def post(self, item_data):
         """Initiate a new transactions (deposit, withdrawal or transfer )"""
+        # print("halloo")
+        # print(item_data)
         transactionModel:TransactionsModel=None
+        schemas=TransactionCreateSchemas()
         try: 
-            transactionModel= TransactionsBaseSchemas().load(**item_data)
+            transactionModel= schemas.load(item_data)
         except ValueError as e:
             abort(HTTPStatus.NOT_ACCEPTABLE, message="the balance is not enough")
             
