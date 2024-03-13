@@ -9,11 +9,12 @@ from flask_jwt_extended import jwt_required
 
 from app.transaction_api.service.DbModelService import DbModelService
 from app.transaction_api.schemas.account import (
-    AccountUpdateSchemas,
+    AccountBaseSchemas,
     AccountCreateSchemas,
     AccountResponseSchema
     )
 from app.transaction_api.model.account import AccountModel
+from app.transaction_api.util.JWTGetters import getCurrentAuthId
 
 
 blp= Blueprint("account", __name__,description="""
@@ -26,19 +27,43 @@ DBS= DbModelService(AccountModel)
 class AccountView(MethodView):
     
     @jwt_required()
-    @blp.response(HTTPStatus.OK, AccountResponseSchema(many=True) )
+    @blp.response(HTTPStatus.OK, AccountResponseSchema(many=True))
+    @blp.alt_response(status_code= HTTPStatus.NOT_FOUND, description="user does't have any account")
+    @blp.alt_response(status_code= HTTPStatus.INTERNAL_SERVER_ERROR, description="server error while query user account ")
     def get(self):
         """retrieve a list of all accounts belonging to the currently authenticated user"""
-        return DBS.getDbModalAll()
-    @jwt_required()
-    @blp.arguments(AccountCreateSchemas)
-    @blp.response(HTTPStatus.CREATED, AccountResponseSchema)
-    def post(self,item_data):
-        """create a new account for hte currently authenticated user"""
+        authId= getCurrentAuthId()
+        allAcount:list[AccountModel]=AccountModel.query.filter(AccountModel.user_id == authId).all()
         try:
-            return DBS.addModel(item_data)
+            allAcount:list[AccountModel]=AccountModel.query.filter(AccountModel.user_id == authId).all()
+        except Exception as e:
+            abort(HTTPStatus.INTERNAL_SERVER_ERROR, message="failed to query all acount belonging the user")
+        if len(allAcount) ==0:
+            abort(HTTPStatus.NOT_FOUND, message="user does't have any account")
+        
+        return allAcount
+            
+    
+    @jwt_required()
+    @blp.arguments(AccountBaseSchemas)
+    @blp.response(HTTPStatus.CREATED, AccountResponseSchema)
+    @blp.alt_response(status_code= HTTPStatus.INTERNAL_SERVER_ERROR, description="server error while create account or inserting account to data base")
+    def post(self,user_data):
+        """create a new account for hte currently authenticated user"""
+        schemasCreate= AccountCreateSchemas()
+        authId= getCurrentAuthId()
+        accountModel:AccountModel
+        try:
+          accountModel:AccountModel= schemasCreate.load({
+              "user_id":authId,
+              **user_data
+          })
+        except:
+          abort(HTTPStatus.INTERNAL_SERVER_ERROR, message="failed to create account")
+        try:
+            return DBS.addModel(accountModel)
         except Exception as  E:            
-            abort(HTTPStatus.NOT_ACCEPTABLE, message="failed to create account")
+            abort(HTTPStatus.INTERNAL_SERVER_ERROR, message="failed to insert account account")
     
 @blp.route("/account/<string:account_id>")
 class AccountViews(MethodView):
@@ -50,11 +75,11 @@ class AccountViews(MethodView):
         return DBS.getDbModal(account_id)
     
     @jwt_required()
-    @blp.arguments(AccountUpdateSchemas)
+    @blp.arguments(AccountBaseSchemas)
     @blp.response(HTTPStatus.ACCEPTED, AccountResponseSchema)
     def put(self,item_data,account_id):
         """update details of an existing account"""
         try:
             return DBS.updateDbModel(account_id,item_data)
         except SQLAlchemyError as  E:
-            abort(HTTPStatus.NOT_ACCEPTABLE, message="error while update the animal")
+            abort(HTTPStatus.NOT_ACCEPTABLE, message="error while updating account")
