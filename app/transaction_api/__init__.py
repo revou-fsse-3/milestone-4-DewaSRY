@@ -25,6 +25,8 @@ def create_app(db_url=None):
     jwt= JWTManager(app)
     db.init_app(app)
     migrate = Migrate(app, db)
+    api = Api(app)
+    
 
 
     @jwt.expired_token_loader
@@ -56,7 +58,9 @@ def create_app(db_url=None):
         )
 
 
-    api = Api(app)
+    @app.before_first_request
+    def create_tables():
+        db.create_all()
     
  
     # @app.route("/")

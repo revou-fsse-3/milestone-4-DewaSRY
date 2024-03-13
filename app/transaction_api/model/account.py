@@ -1,13 +1,13 @@
 
 from uuid import uuid4
-from app.transaction_api.util.db import db
+from app.transaction_api.util.db import db,DBModels
 from sqlalchemy.sql import func
 from sqlalchemy import Integer, String, ForeignKey,UUID,DateTime, DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column, Relationship
 # from app.transaction_api.service.ModelMatcher import SpeciesMather, GenderMather
 
 
-class AccountModel(db.Model): 
+class AccountModel(DBModels): 
     __tablename__= "account"
     id:Mapped[UUID]=mapped_column("account_id", UUID, default=uuid4, primary_key=True)
     user_id:Mapped[UUID]=mapped_column("user_id", UUID, ForeignKey("user.user_id"))
