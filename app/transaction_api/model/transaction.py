@@ -16,12 +16,12 @@ class TransactionsModel(DBModels):
     
     amount:Mapped[float]= mapped_column("amount",DECIMAL(10,2))
     type:Mapped[str]= mapped_column("type", String(30))
-    description:Mapped[str]= mapped_column("description", String(250), nullable=False)
+    description:Mapped[str]= mapped_column("description", String(250))
     
 
     created_at = mapped_column("created_at", DateTime(timezone=True), server_default=func.now())
     
-    def __init__(self,from_account_id:str, to_account_id:str, amount: float, type: str,description:str) -> None:
+    def __init__(self,from_account_id:UUID, to_account_id:UUID, amount: float, type: str,description:str) -> None:
         self.from_account_id= from_account_id
         self.to_account_id= to_account_id
         self.amount= amount

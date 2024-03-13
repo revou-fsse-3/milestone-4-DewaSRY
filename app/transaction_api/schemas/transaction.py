@@ -1,21 +1,46 @@
+from marshmallow import Schema, fields,post_load
+from app.transaction_api.model.transaction import TransactionsModel
+from app.transaction_api.model.account import AccountModel
+from app.transaction_api.service.ModelMatcher import matherAccountModeWIthId
 
-from flask_smorest import Blueprint
-from flask.views import MethodView
+
+from app.transaction_api.util.db import db
 
 
-blp= Blueprint("transactions", __name__, description="""transaction management """)
 
-@blp.route("/transactions")
-class TransactionView(MethodView):
-    def get():
-        """Retrieve a list of all transaction for the currently authenticated user's account """
-        pass
+class TransactionsBaseSchemas(Schema):
+    from_account_id=fields.UUID(required=True)
+    to_account_id=fields.UUID(required=True)
+    amount = fields.Float(required=True)
+    type=fields.Str(required=False)
+    description=fields.Str(required=False)
+    
+    @post_load
+    def create_Transactions(self, data, **kwargs):
+        from_account_id=data['from_account_id']
+        to_account_id=data['to_account_id']
+        amount = data['amount']
+        # type=data['type']
+        # description=data['description']
         
-    def post():
-        """Initiate a new transactions (deposit, withdrawal or transfer )"""
+        accountFrom:AccountModel= matherAccountModeWIthId(from_account_id)
+        accountTo:AccountModel=matherAccountModeWIthId(to_account_id)
+        if accountFrom.balance < amount:
+            raise ValueError(f"acount with id : {from_account_id} have not enough money")
+        accountFrom.update(balance=accountFrom.balance- amount )
+        accountTo.update(balance=accountTo.balance+ amount )
+        db.session.add_all([accountFrom,accountTo ])
+        db.session.commit()
+        
+        return TransactionsModel(**data)
 
 
-@blp.route("/transactions/<string:transaction_id>")
-class TransactionViews(MethodView):
-    def get():
-        """retrieval details of specific transaction by its ID"""
+
+
+
+
+class TransactionsResponseSchema(TransactionsBaseSchemas):
+    id=fields.Str()
+    created_at = fields.DateTime()
+    
+    

@@ -20,15 +20,18 @@ class AccountModel(DBModels):
     updated_at = mapped_column("updated_at",DateTime(timezone=True), onupdate=datetime.now)
 
     
-    def __init__(self,user_id:str,  account_type:str, account_number:str,balance: float) -> None:
+    def __init__(self,user_id:UUID, account_type:str, account_number:str,balance: float) -> None:
+ 
         self.user_id= user_id
+        
         self.account_type= account_type
         self.account_number= account_number
         self.balance= balance
         
-    def update(self, account_type:str, account_number:str,balance: float):
-        self.account_type= account_type
-        self.account_number= account_number
-        self.balance= balance
+    def update(self, account_type:str= None, account_number:str=None,balance: float=None):
+        self.account_type= account_type if account_type!= None else self.account_type
+        self.balance= balance if balance!= None else self.balance
+        self.account_number= account_number if account_number!= None else self.account_number
+        
         
         

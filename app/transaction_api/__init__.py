@@ -9,6 +9,11 @@ from app.transaction_api.util.db import db
 from app.transaction_api.util.sql_phat import my_sql
 
 
+from app.transaction_api.views.user import blp as UserView
+from app.transaction_api.views.account import blp as AccountViews
+from app.transaction_api.views.transaction import blp as TransactionViews
+ 
+
 def create_app(db_url=None):
     app = Flask(__name__,static_url_path="/",static_folder="../frontend/dist")
     app.config["API_TITLE"] = "transaction  API "
@@ -65,7 +70,9 @@ def create_app(db_url=None):
  
     # @app.route("/")
     # def index():
-    #     return app.send_static_file("index.html")
-
+    #     return app.send_static_file("index.html")   
+    api.register_blueprint(UserView)
+    api.register_blueprint(AccountViews,)
+    api.register_blueprint(TransactionViews)
     return app
 
