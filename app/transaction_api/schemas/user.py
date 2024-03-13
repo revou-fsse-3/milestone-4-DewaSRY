@@ -2,11 +2,16 @@ from marshmallow import Schema, fields,post_load
 
 from app.transaction_api.model.user import UserModel
 
-class UserPayloadSchema(Schema):
+
+class LoginSchemas(Schema):
+    """login schemas"""
+    __name__="user base schemas"
+    username= fields.String(required=True)
+    password= fields.String(required=True)
+
+class UserPayloadSchema(LoginSchemas):
     """payload to create schemas"""
-    username= fields.Str()
     email= fields.Str()
-    password= fields.Str()
     
 class UserCreateSchema(UserPayloadSchema):
     """schemas to create Model"""
@@ -19,3 +24,4 @@ class UseResponseSchema(UserPayloadSchema):
     id=fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
+    

@@ -33,7 +33,10 @@ def create_app(db_url=None):
     api = Api(app)
     
 
-
+    # @jwt.additional_claims_loader
+    # def add_claim_to_jwt(identity):
+        
+        
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
         return (
@@ -67,6 +70,7 @@ def create_app(db_url=None):
     # def create_tables():
     #     db.create_all()
     
+    # use to create data table for the first time
     with app.app_context():
         db.create_all()
  

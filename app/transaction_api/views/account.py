@@ -4,6 +4,7 @@ from flask_smorest import Blueprint,abort
 from flask.views import MethodView
 from sqlalchemy.exc import SQLAlchemyError
 from http import HTTPStatus
+from flask_jwt_extended import jwt_required
 
 
 from app.transaction_api.service.DbModelService import DbModelService
@@ -24,11 +25,12 @@ DBS= DbModelService(AccountModel)
 @blp.route("/account")
 class AccountView(MethodView):
     
-    @blp.response(HTTPStatus.OK, AccountResponseSchema(many=True))
+    @jwt_required()
+    @blp.response(HTTPStatus.OK, AccountResponseSchema(many=True) )
     def get(self):
         """retrieve a list of all accounts belonging to the currently authenticated user"""
         return DBS.getDbModalAll()
-    
+    @jwt_required()
     @blp.arguments(AccountCreateSchemas)
     @blp.response(HTTPStatus.CREATED, AccountResponseSchema)
     def post(self,item_data):
@@ -41,12 +43,13 @@ class AccountView(MethodView):
 @blp.route("/account/<string:account_id>")
 class AccountViews(MethodView):
     
-    
+    @jwt_required()
     @blp.response(HTTPStatus.OK, AccountResponseSchema)
     def get(self,account_id):
         """retrieve details of specific accounts by its id, """
         return DBS.getDbModal(account_id)
     
+    @jwt_required()
     @blp.arguments(AccountUpdateSchemas)
     @blp.response(HTTPStatus.ACCEPTED, AccountResponseSchema)
     def put(self,item_data,account_id):

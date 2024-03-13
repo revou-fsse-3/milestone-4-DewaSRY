@@ -40,13 +40,12 @@ class AccountModel(DBModels):
         
     def transfer(self, amount: float, to_account_id:str, ):
         decimalAmount=Decimal(amount)
-        print("hite this")
-        print(decimalAmount.compare(self.balance))
-        print(self.balance)
+        
         if decimalAmount.compare(self.balance) > 0:
             """if the amount to transfer is greater the current balance app will throw error """
             raise ValueError(f"acount with id : {self.id} have not enough money, ")
         self.balance= self.balance - decimalAmount;
+        
         receiver:AccountModel= self.query.get_or_404(to_account_id)
         receiver.receive(amount= decimalAmount)
     

@@ -2,8 +2,8 @@
 from uuid import uuid4
 from app.transaction_api.util.db import DBModels
 from sqlalchemy.sql import func
-from sqlalchemy import Integer, String,DateTime,BINARY
-from sqlalchemy.orm import Mapped, mapped_column, Relationship
+from sqlalchemy import  String,DateTime
+from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 from passlib.hash import pbkdf2_sha256
 

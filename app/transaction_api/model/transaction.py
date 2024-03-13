@@ -2,7 +2,7 @@
 from uuid import uuid4
 from app.transaction_api.util.db import DBModels
 from sqlalchemy.sql import func
-from sqlalchemy import Integer, String, ForeignKey,UUID,DateTime, DECIMAL,BINARY
+from sqlalchemy import Integer, String, ForeignKey,UUID,DateTime, DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 from decimal import Decimal
