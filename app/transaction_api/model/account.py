@@ -2,10 +2,10 @@
 from uuid import uuid4
 from app.transaction_api.util.db import db,DBModels
 from sqlalchemy.sql import func
-from sqlalchemy import Integer, String, ForeignKey,UUID,DateTime, DECIMAL
+from sqlalchemy import  String, ForeignKey,UUID,DateTime, DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column, Relationship
-# from app.transaction_api.service.ModelMatcher import SpeciesMather, GenderMather
 
+from datetime import datetime
 
 class AccountModel(DBModels): 
     __tablename__= "account"
@@ -17,7 +17,8 @@ class AccountModel(DBModels):
     balance:Mapped[float]= mapped_column("balance",DECIMAL(10,2))
     
     created_at = mapped_column("created_at", DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column("updated_at",DateTime(timezone=True), onupdate=func.now())
+    updated_at = mapped_column("updated_at",DateTime(timezone=True), onupdate=datetime.now)
+
     
     def __init__(self,user_id:str,  account_type:str, account_number:str,balance: float) -> None:
         self.user_id= user_id

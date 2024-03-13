@@ -5,15 +5,13 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine("sqlite:///test/data.db")
+engine = create_engine("sqlite:///tests/data.db")
 Session = sessionmaker(bind=engine)
 
 class ModelTestBase(unittest.TestCase):
-    
     def setup_class(self):
         DBModels.metadata.create_all(engine)
         self.session = Session()
-   
     def teardown_class(self):
         self.session.rollback()
         self.session.close()
