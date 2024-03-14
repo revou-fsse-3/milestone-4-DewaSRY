@@ -12,6 +12,8 @@ from app.transaction_api.schemas.transaction import (
     )
 
 from app.transaction_api.model.transaction import TransactionsModel
+from app.transaction_api.model.account import AccountModel
+from app.transaction_api.util.JWTGetters import getCurrentAuthId
 
 blp= Blueprint("transactions", __name__, description="""
                transaction management 
@@ -25,8 +27,19 @@ class TransactionView(MethodView):
     @blp.response(HTTPStatus.OK, TransactionsResponseSchema(many=True))
     def get(self):
         """Retrieve a list of all transaction for the currently authenticated user's account """
-        print("halloo")
-        return DBS.getDbModalAll()
+        currentUserId=getCurrentAuthId()
+        
+        transactionUserTransfer:list[TransactionsModel]=TransactionsModel.query\
+            .join(AccountModel,AccountModel.id== TransactionsModel.from_account_id  )\
+                .filter(AccountModel.user_id ==currentUserId).all()
+                
+        transactionListUserReceive:list[TransactionsModel]=TransactionsModel.query\
+            .join(AccountModel,AccountModel.id == TransactionsModel.to_account_id)\
+                .filter(AccountModel.user_id ==currentUserId).all()
+                
+
+        
+        return transactionUserTransfer + transactionListUserReceive
     
     @jwt_required()
     @blp.arguments(TransactionPayloadSchemas)

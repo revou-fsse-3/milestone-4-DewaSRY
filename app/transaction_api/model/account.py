@@ -3,10 +3,12 @@ from uuid import uuid4
 from app.transaction_api.util.db import DBModels
 from sqlalchemy.sql import func
 from sqlalchemy import  String, ForeignKey,DateTime, DECIMAL
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column,relationship
 from decimal import Decimal
 
 from datetime import datetime
+
+from app.transaction_api.model.user import UserModel
 
 class AccountModel(DBModels): 
     __tablename__= "account"
@@ -19,6 +21,8 @@ class AccountModel(DBModels):
     
     created_at = mapped_column("created_at", DateTime(timezone=True), server_default=func.now())
     updated_at = mapped_column("updated_at",DateTime(timezone=True), onupdate=datetime.now)
+    
+    user:Mapped[UserModel]= relationship("UserModel", foreign_keys=[user_id])
 
     
     def __init__(self,user_id:str, account_type:str, account_number:str,balance: float) -> None:
@@ -51,4 +55,7 @@ class AccountModel(DBModels):
     
     def receive(self,  amount: Decimal):
         self.balance= self.balance + amount
+        
+    def __repr__(self) -> str:
+        return f"{self.user_id} {self.balance} {self.account_type}"
         
