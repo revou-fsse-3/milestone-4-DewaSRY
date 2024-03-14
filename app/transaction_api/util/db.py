@@ -14,3 +14,14 @@ DBModels= db.Model
 
 
 ModelType= TypeVar("ModelType", bound= DBModels)
+
+
+def categoryNameMap(categoryList,temp=[] ):
+  for t in categoryList:
+    temp.append(t["name"])
+  return temp
+
+
+
+ACCOUNT_TYPE_LIST=[]
+TRANSACTION_TYPE_LIST=[]

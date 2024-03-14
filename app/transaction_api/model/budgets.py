@@ -23,7 +23,6 @@ class BudgetsModel(DBModels):
     
     user:Mapped[UserModel]= relationship("UserModel", foreign_keys=[user_id])
 
-    
     def __init__(self,user_id:str, name:str,amount: float, endDays: int) -> None:
         self.id= str(uuid4())
         

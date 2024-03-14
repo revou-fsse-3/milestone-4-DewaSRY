@@ -26,8 +26,8 @@ class AccountModel(DBModels):
     created_at = mapped_column("created_at", DateTime(timezone=True), server_default=func.now())
     updated_at = mapped_column("updated_at",DateTime(timezone=True), onupdate=datetime.now)
     
-    # user:Mapped[UserModel]= relationship("UserModel", foreign_keys=[user_id])
     account_type:Mapped[AcountTypeModel]= relationship("AcountTypeModel", foreign_keys=[type_id], backref="account")
+    
 
     
     def __init__(self,user_id:str, account_type:str, account_number:str,balance: float) -> None:

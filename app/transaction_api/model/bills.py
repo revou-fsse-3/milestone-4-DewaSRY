@@ -17,14 +17,10 @@ class BillsModel(DBModels):
     user_id:Mapped[str]=mapped_column("user_id", String(36), ForeignKey("user.user_id"))
     account_id:Mapped[str]=mapped_column("account_id", String(36), ForeignKey("account.account_id"))
     
-    
     biller_name:Mapped[str]= mapped_column("biller_name", String(250) )
     amount:Mapped[Decimal]= mapped_column("amount",DECIMAL(10,2))
     
-    
     due_date = mapped_column("due_date", DateTime(timezone=True), server_default=func.now())
-    
-    
     user:Mapped[UserModel]= relationship("UserModel", foreign_keys=[user_id])
     account:Mapped[AccountModel]= relationship("AccountModel", foreign_keys=[account_id])
 

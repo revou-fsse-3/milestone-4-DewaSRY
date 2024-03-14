@@ -18,7 +18,7 @@ from app.transaction_api.schemas.account import (
 from app.transaction_api.model.account import AccountModel
 from app.transaction_api.model.account_type import AcountTypeModel
 from app.transaction_api.util.JWTGetters import getCurrentAuthId
-
+from app.transaction_api.util.db import ACCOUNT_TYPE_LIST,TRANSACTION_TYPE_LIST
 
 blp= Blueprint("account", __name__,description="""
                account managements 
@@ -67,7 +67,7 @@ class AccountView(MethodView):
         except ValueError as E:
           abort(HTTPStatus.NOT_ACCEPTABLE, message={
               "error_text":str(E),
-              "available_acount_type" : ["checking","saving" ]
+              "available_acount_type" : ACCOUNT_TYPE_LIST
           })
         try:
             return DBS.addModel(accountModel)

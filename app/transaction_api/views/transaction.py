@@ -14,6 +14,7 @@ from app.transaction_api.schemas.transaction import (
 from app.transaction_api.model.transaction import TransactionsModel
 from app.transaction_api.model.account import AccountModel
 from app.transaction_api.util.JWTGetters import getCurrentAuthId
+from app.transaction_api.util.db import TRANSACTION_TYPE_LIST
 
 blp= Blueprint("transactions", __name__, description="""
                transaction management 
@@ -55,13 +56,7 @@ class TransactionView(MethodView):
         except ValueError as E:
             abort(HTTPStatus.NOT_ACCEPTABLE, message={
               "error_text":str(E),
-              "available_transaction_type" : ["groceries",
-                                              "rent",
-                                              "entertainment",
-                                              "deposit",
-                                              "withdrawal",
-                                              "transfer"
-                                              ]
+              "available_transaction_type" :TRANSACTION_TYPE_LIST
           })
       
         try:

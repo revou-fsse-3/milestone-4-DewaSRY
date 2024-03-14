@@ -5,9 +5,12 @@ from flask_jwt_extended import JWTManager
 
 
 
-from app.transaction_api.util.db import db
+from app.transaction_api.util.db import db,ACCOUNT_TYPE_LIST,TRANSACTION_TYPE_LIST,categoryNameMap
 from app.transaction_api.util.sql_phat import my_sql
+from app.transaction_api.schemas.category import CategorySchemas
 
+
+schemasCategory=CategorySchemas(many=True)
 
 from app.transaction_api.views.user import blp as UserView
 from app.transaction_api.views.account import blp as AccountViews
@@ -77,8 +80,13 @@ def create_app(db_url=None):
     
     # use to create data table for the first time
     
-    # with app.app_context():
-    #     db.create_all()
+    with app.app_context():
+        db.create_all()
+        accountTypeList= AcountTypeModel.query.all()
+        transactionCategoryList= TransactionCategoryModel.query.all()
+        categoryNameMap(schemasCategory.dump(accountTypeList),ACCOUNT_TYPE_LIST)
+        categoryNameMap(schemasCategory.dump(transactionCategoryList),TRANSACTION_TYPE_LIST)
+  
     #     if len(TransactionCategoryModel.query.all() ) == 0:
     #         db.session.add_all([
     #             TransactionCategoryModel("groceries"),
