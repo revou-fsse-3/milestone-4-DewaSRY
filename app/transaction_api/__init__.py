@@ -16,6 +16,7 @@ from app.transaction_api.views.user import blp as UserView
 from app.transaction_api.views.account import blp as AccountViews
 from app.transaction_api.views.transaction import blp as TransactionViews
 from app.transaction_api.views.budgets import blp as BudgetViews
+from app.transaction_api.views.bills import blp as BillsViews
  
 from app.transaction_api.model.transaction_categories import TransactionCategoryModel
 from app.transaction_api.model.account_type import AcountTypeModel
@@ -108,5 +109,6 @@ def create_app(db_url=None):
     api.register_blueprint(AccountViews,)
     api.register_blueprint(TransactionViews)
     api.register_blueprint(BudgetViews)
+    api.register_blueprint(BillsViews)
     return app
 

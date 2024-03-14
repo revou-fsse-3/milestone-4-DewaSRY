@@ -21,24 +21,26 @@ class BillsModel(DBModels):
     amount:Mapped[Decimal]= mapped_column("amount",DECIMAL(10,2))
     
     due_date = mapped_column("due_date", DateTime(timezone=True), server_default=func.now())
-    user:Mapped[UserModel]= relationship("UserModel", foreign_keys=[user_id])
-    account:Mapped[AccountModel]= relationship("AccountModel", foreign_keys=[account_id])
-
     
-    def __init__(self,user_id:str,account_id:str, biller_name:str,amount: float, daysOfBills:int) -> None:
+    user:Mapped[UserModel]= relationship("UserModel", foreign_keys=[user_id])
+    account:Mapped[AccountModel]= relationship("AccountModel", foreign_keys=[account_id], backref="bill")
+    
+    def __init__(self,user_id:str,account_id:str, biller_name:str,amount: float, date_line_days:int) -> None:
         self.id= str(uuid4())
+        
         self.user_id= user_id
         self.account_id= account_id
         
         self.biller_name= biller_name
         self.amount= amount
         
-        self.due_date= datetime.now() + timedelta(days=daysOfBills)
+        self.due_date= datetime.now() + timedelta(days=date_line_days)
         
-    def update(self, biller_name:str=None,amount: float=None, daysOfBills:int=None):
+    def update(self, account_id:str=None, biller_name:str=None,amount: float=None, date_line_days:int=None):
+        self.account_id= account_id if account_id!= None else self.account_id
         self.biller_name= biller_name if biller_name!= None else self.biller_name
         self.amount= amount if amount!= None else self.amount
-        self.due_date= datetime.now() + timedelta(days=daysOfBills) if daysOfBills!= None else self.due_date
+        self.due_date= datetime.now() + timedelta(days=date_line_days) if date_line_days!= None else self.due_date
                 
         
         
