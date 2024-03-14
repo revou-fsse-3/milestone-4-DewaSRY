@@ -39,3 +39,6 @@ class TransactionsResponseSchema(TransactionPayloadSchemas):
     created_at = fields.DateTime()
     
     
+class TransactionCategoryListSchemas(Schema):
+    name=fields.Str()
+    transaction=fields.List(fields.Nested(TransactionsResponseSchema()), dump_only=True)

@@ -24,6 +24,7 @@ class TransactionsModel(DBModels):
     description:Mapped[str]= mapped_column("description", String(250))
     
     created_at = mapped_column("created_at", DateTime(timezone=True), server_default=func.now())
+    
     type:Mapped[TransactionCategoryModel]= relationship("TransactionCategoryModel", foreign_keys=[type_id], backref="transaction")
     
     
