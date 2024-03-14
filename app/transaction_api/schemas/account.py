@@ -2,7 +2,7 @@ from marshmallow import Schema, fields,post_load
 from app.transaction_api.model.account import AccountModel
 
 from app.transaction_api.service.ModelMatcher import matherModel
-from app.transaction_api.model.account_type import AcountTypeModel
+
 class AccountBaseSchemas(Schema):
     """base account schemas for update"""
     account_type=fields.Str()

@@ -23,7 +23,7 @@ class BudgetsModel(DBModels):
     
     user:Mapped[UserModel]= relationship("UserModel", foreign_keys=[user_id])
 
-    def __init__(self,user_id:str, name:str,amount: float, endDays: int) -> None:
+    def __init__(self,user_id:str, name:str,amount: float, date_line_days: int) -> None:
         self.id= str(uuid4())
         
         self.user_id= user_id
@@ -31,13 +31,13 @@ class BudgetsModel(DBModels):
         
         self.name= name
         self.amount= amount
-        self.end_date= datetime.now() + timedelta(days=endDays)
+        self.end_date= datetime.now() + timedelta(days=date_line_days)
     
         
-    def update(self, name:str=None,amount: float =None, endDays: int=None):
+    def update(self, name:str=None,amount: float =None, date_line_days: int=None):
         self.name= name if name!= None else self.name
         self.amount= amount if amount!= None else self.amount
-        self.end_date= datetime.now() + timedelta(days=endDays) if endDays!= None else self.end_date
+        self.end_date= datetime.now() + timedelta(days=date_line_days) if date_line_days!= None else self.end_date
     
         
  
