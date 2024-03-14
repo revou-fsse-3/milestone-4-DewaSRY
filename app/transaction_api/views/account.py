@@ -1,6 +1,7 @@
 
 
 from flask_smorest import Blueprint,abort
+from flask import jsonify
 from flask.views import MethodView
 from sqlalchemy.exc import SQLAlchemyError
 from http import HTTPStatus
@@ -11,9 +12,11 @@ from app.transaction_api.service.DbModelService import DbModelService
 from app.transaction_api.schemas.account import (
     AccountBaseSchemas,
     AccountCreateSchemas,
-    AccountResponseSchema
+    AccountResponseSchema,
+    AccountPayloadSchemas
     )
 from app.transaction_api.model.account import AccountModel
+from app.transaction_api.model.account_type import AcountTypeModel
 from app.transaction_api.util.JWTGetters import getCurrentAuthId
 
 
@@ -48,6 +51,9 @@ class AccountView(MethodView):
     @blp.arguments(AccountBaseSchemas)
     @blp.response(HTTPStatus.CREATED, AccountResponseSchema)
     @blp.alt_response(status_code= HTTPStatus.INTERNAL_SERVER_ERROR, description="server error while create account or inserting account to data base")
+    @blp.alt_response(status_code= HTTPStatus.NOT_ACCEPTABLE, description="""
+                      there is some issue while create account model, there is might be some error while looking for match account type
+                      """)
     def post(self,user_data):
         """create a new account for hte currently authenticated user"""
         schemasCreate= AccountCreateSchemas()
@@ -58,8 +64,11 @@ class AccountView(MethodView):
               "user_id":authId,
               **user_data
           })
-        except:
-          abort(HTTPStatus.INTERNAL_SERVER_ERROR, message="failed to create account")
+        except ValueError as E:
+          abort(HTTPStatus.NOT_ACCEPTABLE, message={
+              "error_text":str(E),
+              "available_acount_type" : ["checking","saving" ]
+          })
         try:
             return DBS.addModel(accountModel)
         except Exception as  E:            
@@ -81,5 +90,8 @@ class AccountViews(MethodView):
         """update details of an existing account"""
         try:
             return DBS.updateDbModel(account_id,item_data)
-        except SQLAlchemyError as  E:
-            abort(HTTPStatus.NOT_ACCEPTABLE, message="error while updating account")
+        except Exception as  E:
+            abort(HTTPStatus.NOT_ACCEPTABLE, message={
+              "error_text":str(E),
+              "available_acount_type" : ["checking","saving" ]
+          })

@@ -13,6 +13,8 @@ from app.transaction_api.views.user import blp as UserView
 from app.transaction_api.views.account import blp as AccountViews
 from app.transaction_api.views.transaction import blp as TransactionViews
  
+from app.transaction_api.model.transaction_categories import TransactionCategoryModel
+from app.transaction_api.model.account_type import AcountTypeModel
 
 def create_app(db_url=None):
     app = Flask(__name__,static_url_path="/",static_folder="../frontend/dist")
@@ -33,8 +35,13 @@ def create_app(db_url=None):
     api = Api(app)
     
 
-    # @jwt.additional_claims_loader
-    # def add_claim_to_jwt(identity):
+  
+    @jwt.additional_claims_loader
+    def add_claims_to_jwt(identity):
+        # Look in the database and see whether the user is an admin
+        print(identity)
+        print("this callback get hite")
+        return {"current_id": identity}
         
         
     @jwt.expired_token_loader
@@ -66,17 +73,28 @@ def create_app(db_url=None):
         )
 
 
-    # @app.before_first_request
-    # def create_tables():
-    #     db.create_all()
+
     
     # use to create data table for the first time
-    with app.app_context():
-        db.create_all()
- 
-    # @app.route("/")
-    # def index():
-    #     return app.send_static_file("index.html")   
+    
+    # with app.app_context():
+    #     db.create_all()
+    #     if len(TransactionCategoryModel.query.all() ) == 0:
+    #         db.session.add_all([
+    #             TransactionCategoryModel("groceries"),
+    #             TransactionCategoryModel("rent"),
+    #             TransactionCategoryModel("entertainment"),
+    #             TransactionCategoryModel("deposit"),
+    #             TransactionCategoryModel("withdrawal"),
+    #             TransactionCategoryModel("transfer"),
+    #             TransactionCategoryModel("receive"),
+    #         ])
+    #         db.session.add_all([
+    #             AcountTypeModel("checking"),
+    #             AcountTypeModel("saving"),
+    #         ])
+    #         db.session.commit()
+
     api.register_blueprint(UserView)
     api.register_blueprint(AccountViews,)
     api.register_blueprint(TransactionViews)

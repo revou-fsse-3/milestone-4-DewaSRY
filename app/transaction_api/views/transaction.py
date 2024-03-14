@@ -2,8 +2,8 @@
 from flask_smorest import Blueprint, abort
 from flask.views import MethodView
 from http import HTTPStatus
-from flask_jwt_extended import jwt_required
-
+from flask_jwt_extended import jwt_required,get_jwt
+from sqlalchemy import or_
 from app.transaction_api.service.DbModelService import DbModelService
 from app.transaction_api.schemas.transaction import (
         TransactionsResponseSchema,
@@ -28,18 +28,17 @@ class TransactionView(MethodView):
     def get(self):
         """Retrieve a list of all transaction for the currently authenticated user's account """
         currentUserId=getCurrentAuthId()
-        
+  
         transactionUserTransfer:list[TransactionsModel]=TransactionsModel.query\
-            .join(AccountModel,AccountModel.id== TransactionsModel.from_account_id  )\
+            .join(AccountModel,or_(
+                AccountModel.id== TransactionsModel.from_account_id,
+                AccountModel.id == TransactionsModel.to_account_id
+            ))\
                 .filter(AccountModel.user_id ==currentUserId).all()
                 
-        transactionListUserReceive:list[TransactionsModel]=TransactionsModel.query\
-            .join(AccountModel,AccountModel.id == TransactionsModel.to_account_id)\
-                .filter(AccountModel.user_id ==currentUserId).all()
-                
+      
 
-        
-        return transactionUserTransfer + transactionListUserReceive
+        return transactionUserTransfer 
     
     @jwt_required()
     @blp.arguments(TransactionPayloadSchemas)
@@ -53,9 +52,18 @@ class TransactionView(MethodView):
         schemas=TransactionCreateSchemas()
         try: 
             transactionModel= schemas.load(item_data)
-        except ValueError as e:
-            abort(HTTPStatus.NOT_ACCEPTABLE, message=f"the balance is not enough")
-        print(item_data)
+        except ValueError as E:
+            abort(HTTPStatus.NOT_ACCEPTABLE, message={
+              "error_text":str(E),
+              "available_transaction_type" : ["groceries",
+                                              "rent",
+                                              "entertainment",
+                                              "deposit",
+                                              "withdrawal",
+                                              "transfer"
+                                              ]
+          })
+      
         try:
             return DBS.addModel(transactionModel)
         except Exception as  E:
@@ -68,4 +76,12 @@ class TransactionViews(MethodView):
     @blp.response(HTTPStatus.OK, TransactionsResponseSchema)
     def get(self,transaction_id ):
         """retrieval details of specific transaction by its ID"""
+        print(transaction_id)
+        return DBS.getDbModal(transaction_id)
+    
+
+@blp.route("/transactions/catagories")
+class TransactionCategoryViews(MethodView):
+    def get(self,transaction_id ):
+        """retrieve  a list of transaction catagories"""
         return DBS.getDbModal(transaction_id)

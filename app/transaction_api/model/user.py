@@ -12,8 +12,8 @@ class UserModel(DBModels):
     id:Mapped[str]=mapped_column("user_id", String(36), primary_key=True)
     
     
-    username:Mapped[str]=mapped_column("username", String(50))
-    email:Mapped[str]=mapped_column("email", String(50))
+    username:Mapped[str]=mapped_column("username", String(50), unique=True, nullable=False)
+    email:Mapped[str]=mapped_column("email", String(50), unique=True)
     password:Mapped[str]=mapped_column("password_hash", String(200))
     
     created_at = mapped_column("created_at", DateTime(timezone=True), server_default=func.now())

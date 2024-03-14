@@ -8,10 +8,7 @@ from passlib.hash import pbkdf2_sha256
 from datetime import timedelta
 from flask_jwt_extended import (
     create_access_token,
-    create_refresh_token,
-    get_jwt_identity,
     jwt_required,
-    get_jwt,
 )
 
 from app.transaction_api.service.DbModelService import DbModelService
@@ -81,7 +78,7 @@ class UserLogin(MethodView):
             UserModel.username == user_data["username"]
         ).first()
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
-            access_token = create_access_token(identity=user.id, expires_delta=timedelta( days=7) )
+            access_token = create_access_token(identity=user.id,fresh=True, expires_delta=timedelta(days=7) )
             return {"access_token": access_token, }
 
         abort(401, message="Invalid credentials.")

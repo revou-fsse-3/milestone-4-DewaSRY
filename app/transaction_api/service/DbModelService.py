@@ -19,7 +19,6 @@ class DbModelService:
             self.dbSession.add(model)
             self.dbSession.commit()
         except Exception as E:
-            print(E)
             raise SQLAlchemyError
 
     def getDbModal(self, store_id: str)->ModelType:
@@ -34,9 +33,10 @@ class DbModelService:
     def updateDbModel(self ,store_id: str, args)->ModelType:
         item=self.getDbModal(store_id)
         if item == None : return 
-
-        item.update(**args)
-        
+        try: 
+          item.update(**args)
+        except Exception as e:
+            raise e
         self.dbSession.add(item)
         self.dbSession.commit()
         return item

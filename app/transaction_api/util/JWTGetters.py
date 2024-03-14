@@ -10,5 +10,5 @@ from flask_jwt_extended import (
 
 def getCurrentAuthId():
     jwt=get_jwt()
-    return jwt.get('sub')
+    return jwt.get('current_id')
 
