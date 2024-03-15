@@ -4,7 +4,6 @@ from flask.views import MethodView
 from http import HTTPStatus
 from flask_jwt_extended import jwt_required
 from sqlalchemy import or_
-from pprint import pprint
 from app.transaction_api.service.DbModelService import DbModelService
 from app.transaction_api.schemas.transaction import (
         TransactionsResponseSchema,
@@ -18,7 +17,11 @@ from app.transaction_api.model.transaction_categories import TransactionCategory
 from app.transaction_api.model.account import AccountModel
 from app.transaction_api.util.JWTGetters import getCurrentAuthId
 from app.transaction_api.util.db import TRANSACTION_TYPE_LIST
-
+from app.transaction_api.doc.transaction import (
+    ERROR_TRANSACTION_LIST,
+    ERROR_TRANSACTION_NOT_FOUND,
+    ERROR_TRANSACTION_CATEGORY_NOT_FOUND,
+    ERROR_CREATE_TRANSACTION)
 blp= Blueprint("transactions", __name__, description="""
                transaction management 
                """)
@@ -29,6 +32,9 @@ class TransactionView(MethodView):
     
     @jwt_required()
     @blp.response(HTTPStatus.OK, TransactionsResponseSchema(many=True))
+    @blp.alt_response(HTTPStatus.NOT_FOUND,
+                      example=ERROR_TRANSACTION_LIST,
+                      description="current user have not transaction list" )
     def get(self):
         """Retrieve a list of all transaction for the currently authenticated user's account """
         currentUserId=getCurrentAuthId()
@@ -39,15 +45,17 @@ class TransactionView(MethodView):
                 AccountModel.id == TransactionsModel.to_account_id
             ))\
                 .filter(AccountModel.user_id ==currentUserId).all()
-                
-      
-
+        if len(transactionList) == 0:
+            abort(HTTPStatus.NOT_FOUND, message={
+                "error":"current account have no transaction history"
+            })
         return transactionList 
     
     @jwt_required()
     @blp.arguments(TransactionPayloadSchemas)
     @blp.response(HTTPStatus.CREATED, TransactionsResponseSchema)
     @blp.alt_response(HTTPStatus.NOT_ACCEPTABLE, 
+                      example=ERROR_CREATE_TRANSACTION,
                       description="failed to create transaction because the receiver have not enough balance",
                       )
     def post(self, item_data):
@@ -69,20 +77,33 @@ class TransactionView(MethodView):
 
 @blp.route("/transactions/<string:transaction_id>")
 class TransactionViews(MethodView):
-    
     @jwt_required()
     @blp.response(HTTPStatus.OK, TransactionsResponseSchema)
+    @blp.alt_response(HTTPStatus.NOT_ACCEPTABLE, 
+                    example=ERROR_TRANSACTION_NOT_FOUND,
+                    description="transaction not found",
+                    )
     def get(self,transaction_id ):
         """retrieval details of specific transaction by its ID"""
-        print(transaction_id)
-        return DBS.getDbModal(transaction_id)
+        try:
+            return DBS.getDbModal(transaction_id)
+        except Exception as e:
+            abort(HTTPStatus.NOT_FOUND ,message="transaction not found")
     
 
 @blp.route("/transactions/catagories")
 class TransactionCategoryViews(MethodView):
     @jwt_required()
     @blp.response(HTTPStatus.OK, TransactionCategoryListSchemas(many=True))
-    def get(self ):
+    @blp.alt_response(HTTPStatus.NOT_ACCEPTABLE, 
+                example=ERROR_TRANSACTION_CATEGORY_NOT_FOUND,
+                description="transaction not found",
+                )
+    @blp.alt_response(HTTPStatus.NOT_FOUND, 
+                example=ERROR_TRANSACTION_NOT_FOUND,
+                description="user does't have any transaction  records",
+                )
+    def get(self):
         """retrieve  a list of transaction catagories for budgeting purpose (have budget type)"""
         currentUserId=getCurrentAuthId()
         categoryTransactionList=TransactionCategoryModel.query\
@@ -93,5 +114,5 @@ class TransactionCategoryViews(MethodView):
             ))\
             .filter(AccountModel.user_id ==currentUserId).all()
         if len(categoryTransactionList) == 0:
-            abort(HTTPStatus.NOT_FOUND, message="user does't have any transaction  records ")
+            abort(HTTPStatus.NOT_FOUND, message="user does't have any transaction  records")
         return categoryTransactionList 

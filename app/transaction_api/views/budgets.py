@@ -38,6 +38,7 @@ class BudgetsViews(MethodView):
             'user_id':currentId
         })
         return DBS.addModel(budgetModel)
+    
     @jwt_required()
     @blp.response(HTTPStatus.OK,BudgetResponseSchemas(many=True))
     def get(self):
@@ -47,8 +48,7 @@ class BudgetsViews(MethodView):
         if len(budgetList) == 0:
             abort(HTTPStatus.CONFLICT ,message="current user does't have any budget" )
         return budgetList
-        
-            
+               
 
 @blp.route("/budgets/<string:budgets_id>")
 class BudgetViews(MethodView):

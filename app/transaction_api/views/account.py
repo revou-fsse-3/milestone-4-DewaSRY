@@ -95,3 +95,8 @@ class AccountViews(MethodView):
               "error_text":str(E),
               "available_acount_type" : ["checking","saving" ]
           })
+    @jwt_required()
+    def delete(self,account_id):
+        "delete account "
+        DBS.deleteDbModal(account_id)
+        return {"message": "account deleted."},HTTPStatus.OK

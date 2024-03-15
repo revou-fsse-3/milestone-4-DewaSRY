@@ -22,7 +22,7 @@ from app.transaction_api.model.transaction_categories import TransactionCategory
 from app.transaction_api.model.account_type import AcountTypeModel
 
 def create_app(db_url=None):
-    app = Flask(__name__,static_url_path="/",static_folder="../frontend/dist")
+    app = Flask(__name__)
     app.config["API_TITLE"] = "transaction  API "
     app.config["API_VERSION"] = "v0"
     app.config["OPENAPI_VERSION"] = "3.0.3"

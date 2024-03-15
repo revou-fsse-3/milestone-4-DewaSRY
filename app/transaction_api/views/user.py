@@ -19,8 +19,7 @@ from app.transaction_api.schemas.user import (
         LoginSchemas
     )
 from app.transaction_api.model.user import UserModel
-from app.transaction_api.util.JWTGetters import getCurrentAuthId
-
+from app.transaction_api.doc.user import ERROR_DUPLICATE_USER,ERROR_USER_NOT_FOUND,ERROR_INVALID_CREDENTIAL
 blp = Blueprint("users", __name__, description="""
                 user management end point
                 """)
@@ -29,49 +28,54 @@ DBS= DbModelService(UserModel)
 
 @blp.route("/user")
 class UserViews(MethodView):
-    
-    @jwt_required()
-    @blp.response(HTTPStatus.OK, UseResponseSchema(many=True)) 
-    def get(self):
-        """retrieve all users """
-        id=getCurrentAuthId()
-        print(id)
-        return DBS.getDbModalAll()
-    
+
     @blp.arguments(UserCreateSchema)
     @blp.response(HTTPStatus.CREATED, UseResponseSchema) 
+    @blp.alt_response(HTTPStatus.CONFLICT,
+                      example=ERROR_DUPLICATE_USER,
+                      description="duplicate username")
     def post(self,item_data):
         """create new user"""
         try:
             return DBS.addModel(item_data)
         except Exception as  E:
-            abort(HTTPStatus.NOT_ACCEPTABLE, message="error while create users ")
+            abort(HTTPStatus.CONFLICT, message="error while create: duplicate user name")
 
 @blp.route("/user/<string:user_id>")
 class UserViews(MethodView): 
     
     @jwt_required()
     @blp.response(HTTPStatus.OK, UseResponseSchema) 
+    @blp.alt_response(HTTPStatus.CONFLICT,
+                      example=ERROR_USER_NOT_FOUND,
+                      description="user not found")
     def get(self,user_id ):
         """retrieve the profile of the currently authenticated user"""
-        return DBS.getDbModal(user_id)
+        try:
+            return DBS.getDbModal(user_id)
+        except Exception as E:
+            abort(HTTPStatus.NOT_FOUND, message="user not found")
+            
     
     @jwt_required()
     @blp.arguments(UserPayloadSchema)
     @blp.response(HTTPStatus.ACCEPTED, UseResponseSchema)
+    @blp.alt_response(HTTPStatus.CONFLICT,
+                      description="error while update the animal")
     def put(self,item_data,user_id):
         """update the profile information of currently authenticated"""
         try:
             return DBS.updateDbModel(user_id,item_data)
         except SQLAlchemyError as  E:
-            abort(HTTPStatus.NOT_ACCEPTABLE, message="error while update the animal")
-
-
+            abort(HTTPStatus.CONFLICT, message="error while update the animal")
 
 @blp.route("/login")
 class UserLogin(MethodView):
     
     @blp.arguments(LoginSchemas)
+    @blp.alt_response(HTTPStatus.UNAUTHORIZED,
+                    example=ERROR_INVALID_CREDENTIAL,
+                    description="user not found")
     def post(self, user_data):
         """user login to get the access token, access token will valid for 7 days"""
         user:UserModel = UserModel.query.filter(
@@ -81,4 +85,4 @@ class UserLogin(MethodView):
             access_token = create_access_token(identity=user.id,fresh=True, expires_delta=timedelta(days=7) )
             return {"access_token": access_token, }
 
-        abort(401, message="Invalid credentials.")
+        abort(HTTPStatus.UNAUTHORIZED, message="Invalid credentials")

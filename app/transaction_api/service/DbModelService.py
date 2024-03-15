@@ -11,15 +11,18 @@ class DbModelService:
         return items
     
     def addModel(self,model: ModelType)->ModelType :
-        self.postDbModal(model)
-        return model
+        try: 
+            self.postDbModal(model)
+            return model
+        except Exception as E:
+            raise E
         
     def postDbModal(self, model:ModelType):
         try:
             self.dbSession.add(model)
             self.dbSession.commit()
         except Exception as E:
-            raise SQLAlchemyError
+            raise E
 
     def getDbModal(self, store_id: str)->ModelType:
         store = self.dbModel.query.get_or_404(store_id)

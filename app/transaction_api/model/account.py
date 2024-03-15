@@ -28,7 +28,6 @@ class AccountModel(DBModels):
     
     account_type:Mapped[AcountTypeModel]= relationship("AcountTypeModel", foreign_keys=[type_id], backref="account")
     
-
     
     def __init__(self,user_id:str, account_type:str, account_number:str,balance: float) -> None:
         self.id= str(uuid4())
